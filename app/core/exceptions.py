@@ -13,3 +13,6 @@ class LLMServiceError(DocumentAnalyzerException):
 class FileValidationError(DocumentAnalyzerException):
     """Raised when file validation fails."""
     pass 
+
+class DocumentProcessingError(Exception):
+    pass

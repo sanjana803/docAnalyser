@@ -6,7 +6,7 @@ from app.core.models import AnalysisRequest
 from app.utils.file_utils import sanitize_path
 from ..core.exceptions import PDFProcessingError
 
-class PdfProcessor:
+class PDFProcessor:
     def __init__(self, chunk_size=1024, chunk_overlap=50):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
@@ -61,7 +61,25 @@ class PdfProcessor:
             PDFProcessingError: If there's an error processing the PDF
         """
         try:
-            # TODO: Implement PDF processing logic
-            return {"status": "success", "content": "PDF processed successfully"}
+            # Open the PDF
+            doc = fitz.open(file_path)
+            
+            # Extract text from all pages
+            text_content = []
+            for page in doc:
+                text_content.append(page.get_text())
+            
+            # Get metadata
+            metadata = doc.metadata
+            
+            # Close the document
+            doc.close()
+            
+            return {
+                "status": "success",
+                "content": "\n".join(text_content),
+                "metadata": metadata,
+                "page_count": len(text_content)
+            }
         except Exception as e:
             raise PDFProcessingError(f"Error processing PDF: {str(e)}")
