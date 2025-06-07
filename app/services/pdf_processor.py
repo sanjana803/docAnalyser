@@ -1,85 +1,37 @@
-import fitz
-from pathlib import Path
-from typing import List, Dict, Any
-from llama_index.core.schema import Document
-from app.core.models import AnalysisRequest
-from app.utils.file_utils import sanitize_path
-from ..core.exceptions import PDFProcessingError
+from langchain.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from typing import List, Dict
 
 class PDFProcessor:
-    def __init__(self, chunk_size=1024, chunk_overlap=50):
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
-        self.supported_formats = ['pdf']
+    def __init__(self, pdf_path: str):
+        self.pdf_path = pdf_path
+        self.text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1000,
+            chunk_overlap=200,
+            length_function=len,
+            separators=["\n\n", "\n", ".", "!", "?", ",", " ", ""]
+        )
 
-    def load_document(self, request: AnalysisRequest) -> List[Document]:
-        sanitized_path = sanitize_path(request.pdf_path)
-        doc = fitz.open(sanitized_path)
-        nodes = []
+    def load_and_split(self) -> List[Dict]:
+        """Load PDF and split into chunks with metadata."""
+        # Load PDF
+        loader = PyPDFLoader(self.pdf_path)
+        pages = loader.load()
         
-        for page_num in range(len(doc)):
-            page = doc.load_page(page_num)
-            nodes.extend(self._process_page(page, page_num, sanitized_path))
+        # Split pages into chunks
+        chunks = []
+        for page in pages:
+            # Split page content
+            page_chunks = self.text_splitter.split_text(page.page_content)
+            
+            # Add chunks with metadata
+            for chunk in page_chunks:
+                chunks.append({
+                    "page_content": chunk,
+                    "metadata": {
+                        **page.metadata,
+                        "chunk_index": len(chunks)
+                    }
+                })
         
-        doc.close()
-        return nodes
-
-    def _process_page(self, page, page_num: int, pdf_path: Path) -> List[Document]:
-        nodes = []
-        words = page.get_text("words")
-        page_text = page.get_text()
-        
-        for line in page_text.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            
-            line_data = self._extract_line_data(line, words)
-            nodes.append(self._create_document_chunk(line_data, page_num, pdf_path))
-        
-        return nodes
-
-    def _extract_line_data(self, line: str, words: list) -> dict:
-        # Implementation of line-word matching logic
-        pass
-
-    def _create_document_chunk(self, line_data: dict, page_num: int, pdf_path: Path) -> Document:
-        # Create Document object with metadata
-        pass
-
-    def process_document(self, file_path: str) -> Dict[str, Any]:
-        """
-        Process a PDF document and extract relevant information.
-        
-        Args:
-            file_path: Path to the PDF file
-            
-        Returns:
-            Dict containing extracted information
-            
-        Raises:
-            PDFProcessingError: If there's an error processing the PDF
-        """
-        try:
-            # Open the PDF
-            doc = fitz.open(file_path)
-            
-            # Extract text from all pages
-            text_content = []
-            for page in doc:
-                text_content.append(page.get_text())
-            
-            # Get metadata
-            metadata = doc.metadata
-            
-            # Close the document
-            doc.close()
-            
-            return {
-                "status": "success",
-                "content": "\n".join(text_content),
-                "metadata": metadata,
-                "page_count": len(text_content)
-            }
-        except Exception as e:
-            raise PDFProcessingError(f"Error processing PDF: {str(e)}")
+        return chunks

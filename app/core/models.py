@@ -1,25 +1,15 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
+from pydantic import BaseModel
+from typing import List, Dict, Any
 
 class AnalysisRequest(BaseModel):
-    pdf_path: str = Field(..., description="Path to PDF document")
-    query: str = Field(..., description="Natural language query")
-    output_dir: Optional[str] = Field("output_images", description="Output directory for highlights")
+    pdf_path: str
+    reference_path: str
+    questions: List[str]
+
+class AnswerItem(BaseModel):
+    question: str
+    answer: str
+    sources: List[Dict[str, Any]]
 
 class AnalysisResponse(BaseModel):
-    answer: List[str]
-    visualization_paths: List[str]
-    processing_time: float
-    confidence: Optional[float]
-    error: Optional[str]
-
-class DocumentAnalysisRequest(BaseModel):
-    file_path: str
-    analysis_type: str
-    options: Optional[dict] = None
-
-class DocumentAnalysisResponse(BaseModel):
-    status: str
-    results: dict
-    highlights: Optional[List[dict]] = None
-    error: Optional[str] = None
+    results: List[AnswerItem]
