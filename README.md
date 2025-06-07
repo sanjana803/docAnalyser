@@ -8,7 +8,6 @@ DocAnalyser is a FastAPI-based service for analyzing PDF documents using advance
 - Named Entity Recognition (NER) using BERT
 - Keyword extraction and analysis
 - RESTful API endpoints for easy integration
-- Caching support with Redis
 - Docker support for containerized deployment
 
 ## Setup
@@ -21,15 +20,9 @@ DocAnalyser is a FastAPI-based service for analyzing PDF documents using advance
    This will:
    - Create a Python virtual environment
    - Install all required dependencies
-   - Check for Redis installation
    - Create necessary directories
 
-3. **Start Redis (optional, for caching):**
-   ```bash
-   redis-server
-   ```
-
-4. **Run the application:**
+3. **Run the application:**
    ```bash
    uvicorn app.main:app --reload
    ```
@@ -92,7 +85,6 @@ document-analyzer/
 - PyMuPDF
 - Transformers
 - Sentence-Transformers
-- Redis (optional, for caching)
 - Docker (optional, for containerization)
 
 ## License

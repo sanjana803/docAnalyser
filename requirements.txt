@@ -1,12 +1,24 @@
+# Web framework & API
 fastapi>=0.110.0
-uvicorn>=0.29.0
+uvicorn[standard]>=0.29.0
+
+# LangChain ecosystem (LLM, embeddings, chains, vectorstore)
+langchain>=0.1.16
+openai>=1.13.3
+faiss-cpu>=1.7.4
+
+# PDF & file processing
+pypdf>=4.2.0
+
+# Environment/config management
+python-dotenv>=1.0.1
+
+# Data models & validation
 pydantic>=2.6.0
-python-multipart>=0.0.9
-llama-index-core>=0.10.20
-llama-index-llms-huggingface>=0.5.0
-sentence-transformers>=2.6.1
-torch>=2.2.1
-PyMuPDF>=1.24.0
-pillow>=10.2.0
-python-dotenv>=1.0.0
-redis>=5.0.0
+
+# OCR (for image-based PDFs, optional)
+pillow>=10.0.0
+pytesseract>=0.3.10
+
+# For type hints and compatibility
+typing-extensions>=4.10.0
